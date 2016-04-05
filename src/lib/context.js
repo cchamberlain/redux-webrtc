@@ -1,68 +1,191 @@
 import { assert } from 'chai'
-import  { ROOT_STATE_KEY
-        , CURRENT_KEY
-        , LAST_ACTIVE_KEY
-        , LAST_EVENT_KEY
-        , IS_IDLE_KEY
-        , IS_PAUSED_KEY
-        , TIMEOUT_ID_KEY
-        , createActionName
-        } from './constants'
+import { validateOpts } from './validate'
 
-import { configureActivityEvent, configureStart, configureStop, configureReset } from './actions'
 import  { createLogger } from './log'
 
+
+/**
+ * @typedef {Object} LibOpts
+ * @property {string} libName the name of the library.
+ * @property {function(context: LibContext): AppValidator} createValidator
+ */
+
+ /**
+  * @typedef {function(opts: AppOpts)} AppValidator
+  */
+
+/**
+ * @typedef {Object} AppOpts
+ * @property {string} appName the name of the application.
+ */
+
+/**
+ * @typedef {Object} LibContext
+ * @property {string} libName the name of the library.
+ * @property {string} appName the name of the application.
+ * @property {string} actionNames the names of the defined actions (ordered).
+ */
+
+/**
+ * @typedef {LibAction[]} LibActions
+ */
+
+/**
+ * @typedef {Array} LibAction
+ */
+
+/**
+ * @typedef {Object} LibContext
+ * @property {string[]} actionNames the names of all the actions (ordered).
+ */
+
+/**
+ * @typedef CreateContext
+ * @type {function(appOpts: AppOpts): AppContext }
+ */
+
+
+
 const noop = () => {}
-const sanitizeActions = actions => actions.map(x => [createActionName(x[0]), x[1]])
+const cleanActionName = name => name.toUpperCase().replace(/-+\s+/, '_')
+const configureActionName = libName => appName => actionName => `${cleanActionName(libName)}_${cleanActionName(appName)}_${cleanActionName(actionName)}`
 
-export default function createContext(opts) {
-  const actions = sanitizeActions(opts.actions)
-  const { activeEvents, useFastState, useLocalState, thresholds, level } = opts
-  const log = createLogger({ level })
+/** Validates library creators options */
+const validateLibOpts = libOptsRaw => {
+  assert.ok(libOptsRaw, 'libOpts definition is required')
+  const { libName, libActions, validateContext, configureAppContext, configureInitialState } = libOptsRaw
+  assert(typeof libName === 'string', 'libName must be a string')
+  assert(libName.length > 0, 'libName must not be empty')
 
-  const actionMap = new Map(actions)
+  assert.ok(libActions, 'libActions must exist')
+  assert(Array.isArray(libActions), 'libActions must be an array')
+  assert(libActions.every(x => Array.isArray(x)), 'libActions must be an array of an array')
+  assert(libActions.every(x => x.length === 2), 'every item in libActions must have length 2')
+  assert(libActions.every(x => typeof x[0] === 'string'), 'every item in libActions must have first ordinal type string action name')
+  assert(libActions.every(x => typeof x[1] === 'object'), 'every item in libActions must have second ordinal type object actionContext')
 
-  const initialActionName = actions[0][0]
-  const initialAction = actions[0][1].action
-  const initialTimeoutMS = actions[0][1].timeoutMS
-  const initialLastEvent = { x: 0, y: 0 }
+  assert.ok(validateContext, 'validateContext must exist')
+  assert(typeof validateContext === 'function', 'validateContext must be a function')
 
-  const createInitialState = ({ lastEvent, timeoutID, isIdle = false, isPaused = false } = { isIdle: false, isPaused: false }) => {
-    return  { [CURRENT_KEY]: initialActionName
-            , [IS_IDLE_KEY]: isIdle
-            , [IS_PAUSED_KEY]: isPaused
-            , [LAST_ACTIVE_KEY]: +new Date()
-            , [LAST_EVENT_KEY]: lastEvent
-            , [TIMEOUT_ID_KEY]: timeoutID
-            }
-  }
+  assert.ok(configureAppContext, 'configureAppContext must exist')
+  assert(typeof configureAppContext === 'function', 'configureAppContext must be a function')
 
-  const getNextActionName = current => {
-    let hitCurrent = false
-    for(let stateName of actions.map(x => x[0])) {
-      if(hitCurrent)
-        return stateName
-      if(stateName === current)
-        hitCurrent = true
-    }
-  }
-  return  { log
-          , get initialState() { return createInitialState() }
-          , getNextActionName
-          , initialActionName
-          , initialAction
-          , initialTimeoutMS
-          , initialLastEvent
-          , activeEvents
-          , get actionNames() { return actions.map(x => x[0]) }
-          , getAction: actionName => actionMap.get(actionName).action
-          , getTimeoutMS: actionName => actionMap.get(actionName).timeoutMS
-          , get useFastState() { return useFastState }
-          , get useLocalState() { return useLocalState }
-          , get thresholds() { return thresholds }
-          }
+  assert.ok(configureInitialState, 'configureInitialState must exist')
+  assert(typeof configureInitialState === 'function', 'configureInitialState must be a function')
+}
+
+/** Validates library consumers options */
+const validateAppOpts = appOptsRaw => {
+  assert.ok(appOptsRaw, 'appOpts are required')
+  const { appName } = appOptsRaw
+
+  assert(typeof appName === 'string', 'appName opt must be a string')
+  assert(appName.length > 0, 'appName opt must not be empty')
+}
+
+const validateAppContext = context => {
 }
 
 
 
+const isDev = process.env.NODE_ENV !== 'production'
 
+const normalizeLibOpts = libOptsRaw => {
+  if(isDev) validateLibOpts(libOptsRaw)
+  const { libName, libActions, validateContext, configureAppContext, configureInitialState } = libOptsRaw
+
+  const libActionMap = new Map(libActions)
+  const libActionNames = libActions.map(x => x[0])
+  const validateAgainstLibOpts = appOptsRaw => {
+    assert(appOptsRaw.appActions.every(x => !libActionNames.includes(x[0])), 'action names must be unique across lib and app')
+  }
+  return  { libName
+          , libActions
+          , libActionMap
+          , libActionNames
+          , validateContext
+          , configureAppContext
+          , configureInitialState
+          , validateAgainstLibOpts
+          }
+
+}
+const normalizeAppOpts = appOptsRaw => {
+  if(isDev) validateAppOpts(appOptsRaw)
+  const { appName, appActions } = appOptsRaw
+  return  { ...appOptsRaw
+          , appActionMap: new Map(appActions)
+          , appActionNames: appActions.map(x => x[0])
+          }
+}
+/*
+import configureContext from 'redux-addons/context'
+const context = configureContext(libOpts)(appOpts)
+const {  } = context
+ */
+export default function configureContext(libOptsRaw) {
+  const libOpts = normalizeLibOpts(libOptsRaw)
+  const { libName, libActions, libActionMap, libActionNames, validateContext, configureAppContext, configureInitialState, validateAgainstLibOpts } = libOpts
+  return appOptsRaw => {
+    if(isDev) validateAgainstLibOpts(appOptsRaw)
+    const appOpts = normalizeAppOpts(appOptsRaw)
+    const { appName, appActions, appActionMap, appActionNames, level } = appOpts
+
+    const actions = [...libActions, ...appActions]
+    const actionMap = new Map(actions)
+    const actionNames = actions.map(x => x[0])
+
+    const createActionType =  actionName => `${cleanActionName(libName)}_${cleanActionName(appName)}_${cleanActionName(actionName)}`
+    const typedLibActions = libActions.map(x => [createActionType(x[0]), x[1]])
+    const typedAppActions = appActions.map(x => [createActionType(x[0]), x[1]])
+    const libActionTypes = typedLibActions.map(x => x[0])
+    const appActionTypes = typedAppActions.map(x => x[0])
+    const typedActions = [...typedLibActions, ...typedAppActions]
+    const typedActionMap = new Map(typedActions)
+    const actionTypes = typedActions.map(x => x[0])
+
+    const getActionType = actionName => actionTypes[actionNames.indexOf(actionName)]
+
+    const getActionContextByName = actionName => actionMap.get(actionName)
+    const getActionContextByType = actionType => typedActionMap.get(actionType)
+    const getLibActionContextByOrdinal = ordinal => libActions[ordinal][1]
+    const getAppActionContextByOrdinal = ordinal => appActions[ordinal][1]
+
+    const libContext =  { log: createLogger({ libName, level })
+                        , libName
+                        , libActions
+                        , libActionMap
+                        , libActionNames
+                        , appName
+                        , appActions
+                        , appActionMap
+                        , appActionNames
+                        , actions
+                        , actionMap
+                        , actionNames
+                        , createActionType
+                        , typedLibActions
+                        , typedAppActions
+                        , libActionTypes
+                        , appActionTypes
+                        , typedActions
+                        , typedActionMap
+                        , actionTypes
+                        , getActionType
+                        , getActionContextByName
+                        , getActionContextByType
+                        , getLibActionContextByOrdinal
+                        , getAppActionContextByOrdinal
+                        }
+
+
+    const appContext = configureAppContext(libContext)(appOpts)
+    if(process.env.NODE_ENV !== 'production') {
+      validateAppContext(appContext)
+      validateContext(libContext, appContext)
+    }
+
+    return Object.assign( appContext, libContext, { get initialState() { return configureInitialState(libContext)(appContext) }
+                                                  })
+  }
+}

@@ -1,25 +1,15 @@
-
-import { validateOpts } from './validate'
-import { getActions, getActiveEvents, getUseFastState, getUseLocalState, getThresholds, getLevel } from './defaults'
 import createContext from './context'
 
-import configureReducer from './reducer'
-import configureActions, { defineAction } from './actions'
+import { createReducer } from './reducer'
+import { createActions, defineAction } from './actions'
+import { createMiddleware } from './middleware'
 
-const configure = ( { actions = getActions()
-                    , activeEvents = getActiveEvents()
-                    , useFastState = getUseFastState()
-                    , useLocalState = getUseLocalState()
-                    , thresholds = getThresholds()
-                    , level = getLevel()
-                    } = {} ) => {
-  const opts = { actions, activeEvents, useFastState, useLocalState, thresholds, level }
-  if(process.env.NODE_ENV !== 'production')
-    validateOpts(opts)
+export { defineAction }
+
+export default function configure(opts) {
   const context = createContext(opts)
-  return  { reducer: configureReducer(context)
-          , actions: configureActions(context)
+  return  { reducer: createReducer(context)
+          , actions: createActions(context)
+          , middleware: createMiddleware(context)
           }
 }
-export default configure
-export { defineAction }

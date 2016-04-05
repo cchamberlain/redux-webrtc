@@ -1,6 +1,6 @@
 # Source files
 client/
-src/
+# src/
 test/
 vagrant/
 

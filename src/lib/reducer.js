@@ -1,33 +1,25 @@
-import  { CURRENT_KEY
-        , LAST_ACTIVE_KEY
-        , LAST_EVENT_KEY
-        , IS_IDLE_KEY
-        , IS_PAUSED_KEY
-        , TIMEOUT_ID_KEY
-        , IDLEMONITOR_ACTIVITY
-        } from './constants'
+import createContext from './context'
+import  { IDLEMONITOR_ACTIVITY } from './constants'
 
-const configureReducer = opts => {
-  const { log, initialState, actionNames, useExternalState } = opts
+/** When context has already been created, it can be shared to middleware component. */
+export const createReducer = context => {
+  const { log, initialState, actionNames, useFastState, useLocalState, useWebRTCState, useWebSocketsState } = context
   return (state = initialState, action = {}) => {
     if(!actionNames.includes(action.type))
       return state
 
     const { type, payload } = action
     if(type === IDLEMONITOR_ACTIVITY) {
-      if(useExternalState)
+      if(useFastState)
         return state
-      return Object.assign({}, state, { [LAST_ACTIVE_KEY]: payload[LAST_ACTIVE_KEY]
-                                      , [LAST_EVENT_KEY]: payload[LAST_EVENT_KEY]
-                                      , [TIMEOUT_ID_KEY]: payload[TIMEOUT_ID_KEY]
-                                      })
+      const { lastActive, lastEvent, timeoutID } = payload
+      return Object.assign({}, state, { lastActive, lastEvent, timeoutID })
     }
 
-    return Object.assign({}, state, { [CURRENT_KEY]: payload[CURRENT_KEY]
-                                    , [IS_IDLE_KEY]: payload[IS_IDLE_KEY]
-                                    , [IS_PAUSED_KEY]: payload[IS_PAUSED_KEY]
-                                    })
+    const { actionName, isIdle, isPaused, lastActive, lastEvent, timeoutID } = payload
+    return Object.assign({}, state, { actionName, isIdle, isPaused, lastActive, lastEvent, timeoutID })
   }
 }
 
-export default configureReducer
+/** Creates reducer from opts including validation in development */
+export default function configureReducer (opts) { return createReducer(createContext(opts)) }

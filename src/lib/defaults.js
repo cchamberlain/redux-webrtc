@@ -19,6 +19,8 @@ export const getActiveEvents = () => [ 'mousemove', 'keydown', 'wheel', 'DOMMous
 
 export const getUseFastState = () => true
 export const getUseLocalState = () => true
+export const getUseWebRTCState = () => true
+export const getUseWebSocketsState = () => true
 
 export const getThresholds = ({ mouse = 10, elapsedMS = 1000 } = { mouse: 10, elapsedMS: 1000 }) => ({ mouse, elapsedMS })
 

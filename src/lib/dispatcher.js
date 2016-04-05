@@ -2,39 +2,31 @@ import { assert } from 'chai'
 import { createAction } from 'redux-actions'
 import  { ROOT_STATE_KEY
         , IDLEMONITOR_ACTIVITY
-        , TIMEOUT_ID_KEY
         } from './constants'
-import configureActions, { start } from './actions'
+import { createActions, start } from 'vendor/redux-idle-monitor/actions'
 
-export default function createDispatcher(context) {
+export default function configureDispatcher(context) {
   return (dispatch, getState) => {
-    const stores = storesDispatcher(context)(dispatch, getState)
-    const timeout = timeoutDispatcher(context, { stores })(dispatch, getState)
-    const detection = detectionDispatcher(context, { stores })(dispatch, getState)
-    const action = actionDispatcher(context, { timeout, stores, detection })(dispatch, getState)
+    const stores = createStoresDispatcher(context)(dispatch, getState)
+    const timeout = createTimeoutDispatcher(context, { stores })(dispatch, getState)
+    const detection = createDetectionDispatcher(context, { stores })(dispatch, getState)
+    const action = createActionDispatcher(context, { timeout, stores, detection })(dispatch, getState)
     return { stores, timeout, detection, action }
   }
 }
 
-const storesDispatcher = context => (dispatch, getState) => {
+const createStoresDispatcher = context => (dispatch, getState) => {
   const { log, getAction, getTimeoutMS, useFastState, useLocalState, initialLastEvent } = context
 
-  const _shouldSetFastState = newState => {
-    if(!useFastState) return false
-    const { lastActive, lastEvent, timeoutID } = newState
-    return typeof lastActive !== 'undefined' || lastEvent !== 'undefined' || typeof timeoutID !== 'undefined'
-  }
+  const fastStateKeys = ['lastActive', 'lastEvent', 'timeoutID', 'isDetectionRunning']
+  const localStateKeys = ['lastActive']
+  const reduxStateKeys = ['actionName', 'isIdle', 'isPaused', 'lastActive', 'lastEvent', 'timeoutID', 'isDetectionRunning']
 
-  const _shouldSetLocalState = newState => {
-    if(!useLocalState) return false
-    const { lastActive, lastEvent } = newState
-    return typeof lastActive !== 'undefined' || lastEvent !== 'undefined'
-  }
+  const _shouldSetState = (stateKeys, newState) => Object.keys(newState).some(x => fastStateKeys.includes(x) && typeof newState[x] !== 'undefined')
 
-  const _shouldSetReduxState = newState => {
-    const { current, isIdle, isPaused } = newState
-    return typeof current !== 'undefined' || typeof isIdle !== 'undefined' || typeof isPaused !== 'undefined'
-  }
+  const _shouldSetFastState = newState => useFastState && _shouldSetState(fastStateKeys, newState)
+  const _shouldSetLocalState = newState => useLocalState && _shouldSetState(localStateKeys, newState)
+  const _shouldSetReduxState = newState => _shouldSetState(reduxStateKeys, newState)
 
   const _filterState = (newState, stateKeys) => {
     return Object.keys(newState).reduce((state, key) => {
@@ -44,7 +36,6 @@ const storesDispatcher = context => (dispatch, getState) => {
     }, {})
   }
 
-  const fastStateKeys = ['lastActive', 'lastEvent', 'timeoutID', 'isDetectionRunning']
   const createFastState = ( { lastEvent = initialLastEvent
                             , timeoutID } = {}) => ({ lastActive: +new Date()
                                                     , lastEvent
@@ -55,10 +46,9 @@ const storesDispatcher = context => (dispatch, getState) => {
   const setFastState = newState => {
     fastState = Object.assign({}, fastState, _filterState(newState, fastStateKeys), { lastActive: +new Date() })
     if(process.env.NODE_ENV !== 'production')
-      log.trace({ fastState }, 'fastState set')
+      log.debug({ fastState }, 'fastState set')
   }
 
-  const localStateKeys = ['lastActive']
   const createLocalState = ({} = {}) => ({ lastActive: +new Date() })
   if(useLocalState)
     localStorage[IDLEMONITOR_ACTIVITY] = createLocalState()
@@ -85,7 +75,7 @@ const storesDispatcher = context => (dispatch, getState) => {
   /** ABSTRACTS ACCESS TO STATE VIA GETTERS */
   const getLibStateAccessor = libState => {
               /** The current state name */
-    return  { get current() { return libState.current }
+    return  { get actionName() { return libState.actionName }
               /** Is in idle state (no more states to progress to) */
             , get isIdle() { return libState.isIdle }
               /** State can be paused manually or via action dispatch or returning null/undefined from timeoutMS function */
@@ -105,15 +95,15 @@ const storesDispatcher = context => (dispatch, getState) => {
     return  { ...state
             , get next() {
                 const events = context.actionNames
-                const nextIndex = events.indexOf(state.current) + 1
+                const nextIndex = events.indexOf(state.actionName) + 1
                 return events[nextIndex] /** MAY BE UNDEFINED */
               }
-            , get action() { return getAction(state.current) }
-            , get timeoutMS() { return getTimeoutMS(state.current) }
+            , get action() { return getAction(state.actionName) }
+            , get timeoutMS() { return getTimeoutMS(state.actionName) }
             , get remainingMS() {
                 if(state.isIdle)
                   return 0
-                const remainingMS = getTimeoutMS(state.current) - (+new Date() - state.lastActive)
+                const remainingMS = getTimeoutMS(state.actionName) - (+new Date() - state.lastActive)
                 return remainingMS > 0 ? remainingMS : 0
               }
             }
@@ -140,7 +130,7 @@ const storesDispatcher = context => (dispatch, getState) => {
           }
 }
 
-const timeoutDispatcher = (context, { stores }) => (dispatch, getState) => {
+const createTimeoutDispatcher = (context, { stores }) => (dispatch, getState) => {
   const { getFastState, getTimeoutMS } = context
   return  { clear: () => clearTimeout(stores.fast.timeoutID)
           , timeoutMS: actionName => {
@@ -150,7 +140,7 @@ const timeoutDispatcher = (context, { stores }) => (dispatch, getState) => {
           }
 }
 
-const detectionDispatcher = (context, { stores }) => (dispatch, getState) => {
+const createDetectionDispatcher = (context, { stores }) => (dispatch, getState) => {
   const { log, activeEvents, initialActionName, initialAction, thresholds } = context
   const { setState } = stores
 
@@ -174,14 +164,14 @@ const detectionDispatcher = (context, { stores }) => (dispatch, getState) => {
     return true
   }
 
-  const _shouldRestart = () => stores.redux.current !== initialActionName
+  const _shouldRestart = () => stores.redux.actionName !== initialActionName
 
   /** One of the event listeners triggered an activity occurrence event. This gets spammed */
   const onActivity = e => {
     if (!_shouldActivityUpdate(e))
       return
     if(_shouldRestart())
-      return dispatch(start(context))
+      return dispatch(context.actions.start())
     /** THIS WILL BE ROUTED TO FAST OR LOCAL STATE IF ENABLED */
     setState(IDLEMONITOR_ACTIVITY, { lastActive: +new Date(), lastEvent: { x: e.pageX, y: e.pageY } })
   }
@@ -206,7 +196,7 @@ const detectionDispatcher = (context, { stores }) => (dispatch, getState) => {
 }
 
 
-const actionDispatcher = (context, { timeout, stores, detection }) => (dispatch, getState) => {
+const createActionDispatcher = (context, { timeout, stores, detection }) => (dispatch, getState) => {
   const { log, getTimeoutMS, getAction, getNextActionName, useFastState, setFastState } = context
   const { setState } = stores
   const _isPauseTriggered = timeoutMS => timeoutMS === null || timeoutMS === false || typeof timeoutMS === 'undefined'
@@ -215,7 +205,7 @@ const actionDispatcher = (context, { timeout, stores, detection }) => (dispatch,
   const schedule = actionName => {
     timeout.clear()
     const timeoutMS = timeout.timeoutMS(actionName)
-    log.info({ actionName, timeoutMS }, 'schedule')
+    log.debug({ actionName, timeoutMS }, 'schedule')
     const args = { actionName, isPaused: _isPauseTriggered(timeoutMS) }
     if(timeoutMS > 0)
       return setTimeout(() => execute(args), timeoutMS)
@@ -233,14 +223,16 @@ const actionDispatcher = (context, { timeout, stores, detection }) => (dispatch,
     let timeoutID = nextActionName && !isPaused ? schedule(nextActionName) : null
 
     if(isPaused && !wasPaused) {
-      log.warn('pausing activity detection')
+      log.info('pausing activity detection')
       detection.stop()
     }
-    if(!isPaused && wasPaused)
+    if(!isPaused && wasPaused) {
+      log.info('unpausing activity detection')
       detection.start()
+    }
 
     /** UPDATE THE STATE OF THE APP */
-    setState(actionName,  { current: actionName
+    setState(actionName,  { actionName: actionName
                           , isIdle: typeof nextActionName === 'undefined'
                           , isPaused
                           , timeoutID
@@ -252,4 +244,4 @@ const actionDispatcher = (context, { timeout, stores, detection }) => (dispatch,
   return { schedule, execute }
 }
 
-const _getChildContext = context => ({ ...context, actions: configureActions(context) })
+const _getChildContext = context => ({ ...context, actions: context.childActions })

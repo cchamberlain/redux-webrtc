@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">lib/context.js | redux-addons API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/cchamberlain/redux-addons" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-configureContext">configureContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-configureDispatcher">configureDispatcher</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-configure">configure</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-configureReducer">configureReducer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-actionDefinition">actionDefinition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-configureAction">configureAction</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-configureDispatcherAction">configureDispatcherAction</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ACTION_PREFIX">ACTION_PREFIX</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-IDLEMONITOR_ACTIVITY">IDLEMONITOR_ACTIVITY</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-LIB_NAME">LIB_NAME</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ROOT_STATE_KEY">ROOT_STATE_KEY</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-getActions">getActions</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-getActiveEvents">getActiveEvents</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-getLevel">getLevel</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-getThresholds">getThresholds</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-getUseFastState">getUseFastState</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-getUseLocalState">getUseLocalState</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-getUseWebRTCState">getUseWebRTCState</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-getUseWebSocketsState">getUseWebSocketsState</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-createLogger">createLogger</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-createReducer">createReducer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-validateOpts">validateOpts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-AppOpts">AppOpts</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-AppValidator">AppValidator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-CreateContext">CreateContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LibAction">LibAction</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LibActions">LibActions</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LibContext">LibContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LibContext">LibContext</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LibOpts">LibOpts</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/context.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import { assert } from &apos;chai&apos;
+import { validateOpts } from &apos;./validate&apos;
+
+import  { createLogger } from &apos;./log&apos;
+
+
+/**
+ * @typedef {Object} LibOpts
+ * @property {string} libName the name of the library.
+ * @property {function(context: LibContext): AppValidator} createValidator
+ */
+
+ /**
+  * @typedef {function(opts: AppOpts)} AppValidator
+  */
+
+/**
+ * @typedef {Object} AppOpts
+ * @property {string} appName the name of the application.
+ */
+
+/**
+ * @typedef {Object} LibContext
+ * @property {string} libName the name of the library.
+ * @property {string} appName the name of the application.
+ * @property {string} actionNames the names of the defined actions (ordered).
+ */
+
+/**
+ * @typedef {LibAction[]} LibActions
+ */
+
+/**
+ * @typedef {Array} LibAction
+ */
+
+/**
+ * @typedef {Object} LibContext
+ * @property {string[]} actionNames the names of all the actions (ordered).
+ */
+
+/**
+ * @typedef CreateContext
+ * @type {function(appOpts: AppOpts): AppContext }
+ */
+
+
+
+const noop = () =&gt; {}
+const cleanActionName = name =&gt; name.toUpperCase().replace(/-+\s+/, &apos;_&apos;)
+const configureActionName = libName =&gt; appName =&gt; actionName =&gt; `${cleanActionName(libName)}_${cleanActionName(appName)}_${cleanActionName(actionName)}`
+
+/** Validates library creators options */
+const validateLibOpts = libOptsRaw =&gt; {
+  assert.ok(libOptsRaw, &apos;libOpts definition is required&apos;)
+  const { libName, libActions, validateContext, configureAppContext, configureInitialState } = libOptsRaw
+  assert(typeof libName === &apos;string&apos;, &apos;libName must be a string&apos;)
+  assert(libName.length &gt; 0, &apos;libName must not be empty&apos;)
+
+  assert.ok(libActions, &apos;libActions must exist&apos;)
+  assert(Array.isArray(libActions), &apos;libActions must be an array&apos;)
+  assert(libActions.every(x =&gt; Array.isArray(x)), &apos;libActions must be an array of an array&apos;)
+  assert(libActions.every(x =&gt; x.length === 2), &apos;every item in libActions must have length 2&apos;)
+  assert(libActions.every(x =&gt; typeof x[0] === &apos;string&apos;), &apos;every item in libActions must have first ordinal type string action name&apos;)
+  assert(libActions.every(x =&gt; typeof x[1] === &apos;object&apos;), &apos;every item in libActions must have second ordinal type object actionContext&apos;)
+
+  assert.ok(validateContext, &apos;validateContext must exist&apos;)
+  assert(typeof validateContext === &apos;function&apos;, &apos;validateContext must be a function&apos;)
+
+  assert.ok(configureAppContext, &apos;configureAppContext must exist&apos;)
+  assert(typeof configureAppContext === &apos;function&apos;, &apos;configureAppContext must be a function&apos;)
+
+  assert.ok(configureInitialState, &apos;configureInitialState must exist&apos;)
+  assert(typeof configureInitialState === &apos;function&apos;, &apos;configureInitialState must be a function&apos;)
+}
+
+/** Validates library consumers options */
+const validateAppOpts = appOptsRaw =&gt; {
+  assert.ok(appOptsRaw, &apos;appOpts are required&apos;)
+  const { appName } = appOptsRaw
+
+  assert(typeof appName === &apos;string&apos;, &apos;appName opt must be a string&apos;)
+  assert(appName.length &gt; 0, &apos;appName opt must not be empty&apos;)
+}
+
+const validateAppContext = context =&gt; {
+}
+
+
+
+const isDev = process.env.NODE_ENV !== &apos;production&apos;
+
+const normalizeLibOpts = libOptsRaw =&gt; {
+  if(isDev) validateLibOpts(libOptsRaw)
+  const { libName, libActions, validateContext, configureAppContext, configureInitialState } = libOptsRaw
+
+  const libActionMap = new Map(libActions)
+  const libActionNames = libActions.map(x =&gt; x[0])
+  const validateAgainstLibOpts = appOptsRaw =&gt; {
+    assert(appOptsRaw.appActions.every(x =&gt; !libActionNames.includes(x[0])), &apos;action names must be unique across lib and app&apos;)
+  }
+  return  { libName
+          , libActions
+          , libActionMap
+          , libActionNames
+          , validateContext
+          , configureAppContext
+          , configureInitialState
+          , validateAgainstLibOpts
+          }
+
+}
+const normalizeAppOpts = appOptsRaw =&gt; {
+  if(isDev) validateAppOpts(appOptsRaw)
+  const { appName, appActions } = appOptsRaw
+  return  { ...appOptsRaw
+          , appActionMap: new Map(appActions)
+          , appActionNames: appActions.map(x =&gt; x[0])
+          }
+}
+/*
+import configureContext from &apos;redux-addons/context&apos;
+const context = configureContext(libOpts)(appOpts)
+const {  } = context
+ */
+export default function configureContext(libOptsRaw) {
+  const libOpts = normalizeLibOpts(libOptsRaw)
+  const { libName, libActions, libActionMap, libActionNames, validateContext, configureAppContext, configureInitialState, validateAgainstLibOpts } = libOpts
+  return appOptsRaw =&gt; {
+    if(isDev) validateAgainstLibOpts(appOptsRaw)
+    const appOpts = normalizeAppOpts(appOptsRaw)
+    const { appName, appActions, appActionMap, appActionNames, level } = appOpts
+
+    const actions = [...libActions, ...appActions]
+    const actionMap = new Map(actions)
+    const actionNames = actions.map(x =&gt; x[0])
+
+    const createActionType =  actionName =&gt; `${cleanActionName(libName)}_${cleanActionName(appName)}_${cleanActionName(actionName)}`
+    const typedLibActions = libActions.map(x =&gt; [createActionType(x[0]), x[1]])
+    const typedAppActions = appActions.map(x =&gt; [createActionType(x[0]), x[1]])
+    const libActionTypes = typedLibActions.map(x =&gt; x[0])
+    const appActionTypes = typedAppActions.map(x =&gt; x[0])
+    const typedActions = [...typedLibActions, ...typedAppActions]
+    const typedActionMap = new Map(typedActions)
+    const actionTypes = typedActions.map(x =&gt; x[0])
+
+    const getActionType = actionName =&gt; actionTypes[actionNames.indexOf(actionName)]
+
+    const getActionContextByName = actionName =&gt; actionMap.get(actionName)
+    const getActionContextByType = actionType =&gt; typedActionMap.get(actionType)
+    const getLibActionContextByOrdinal = ordinal =&gt; libActions[ordinal][1]
+    const getAppActionContextByOrdinal = ordinal =&gt; appActions[ordinal][1]
+
+    const libContext =  { log: createLogger({ libName, level })
+                        , libName
+                        , libActions
+                        , libActionMap
+                        , libActionNames
+                        , appName
+                        , appActions
+                        , appActionMap
+                        , appActionNames
+                        , actions
+                        , actionMap
+                        , actionNames
+                        , createActionType
+                        , typedLibActions
+                        , typedAppActions
+                        , libActionTypes
+                        , appActionTypes
+                        , typedActions
+                        , typedActionMap
+                        , actionTypes
+                        , getActionType
+                        , getActionContextByName
+                        , getActionContextByType
+                        , getLibActionContextByOrdinal
+                        , getAppActionContextByOrdinal
+                        }
+
+
+    const appContext = configureAppContext(libContext)(appOpts)
+    if(process.env.NODE_ENV !== &apos;production&apos;) {
+      validateAppContext(appContext)
+      validateContext(libContext, appContext)
+    }
+
+    return Object.assign( appContext, libContext, { get initialState() { return configureInitialState(libContext)(appContext) }
+                                                  })
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.6)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
